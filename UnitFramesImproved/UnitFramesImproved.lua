@@ -87,13 +87,6 @@ function EnableUnitFramesImproved()
 	
 	-- BossFrame hooks
 	hooksecurefunc("BossTargetFrame_OnLoad", UnitFramesImproved_BossTargetFrame_Style);
-
-	-- Setup relative layout for targetframe compared to PlayerFrame
-	if not TargetFrame:IsUserPlaced() then
-		if not InCombatLockdown() then 
-			TargetFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPRIGHT", 36, 0);
-		end
-	end
 	
 	-- Set up some stylings
 	UnitFramesImproved_Style_PlayerFrame();
