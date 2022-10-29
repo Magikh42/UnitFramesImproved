@@ -2,8 +2,10 @@
 Extends the Blizzard unitframes for better visuals, with a minimal footprint
 
 ## Changes
-Starting integration with WoW Classic and WoW Retail 8.1 patch.
-For now, make sure to load "out-of-date" addons and it should work on both.
+- The mainline is now only supporting Retail WoW 10.0 with modern UI
+
+## Open Issues
+- Support removed for Classic and WotLK, for now please use old versions on CurseForge
 
 ## Distribution
 Packaged and distributed via CurseForge.
