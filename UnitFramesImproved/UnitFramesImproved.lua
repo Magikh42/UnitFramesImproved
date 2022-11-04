@@ -43,15 +43,8 @@ function EnableUnitFramesImproved()
 	TextStatusBar_UpdateTextString(PlayerFrame.manabar);
 end
 
-function CreateStatusBarText(name, parentName, parent, point, x, y)
-	local fontString = parent:CreateFontString(parentName..name, nil, "TextStatusBarText")
-	fontString:SetPoint(point, parent, point, x, y)
-	
-	return fontString
-end
-
 function UnitFramesImproved_Style_PlayerFrame()
-	if not InCombatLockdown() then 
+	if not InCombatLockdown() then
 		PlayerFrameHealthBar.lockColor = true;
 		PlayerFrameHealthBar.capNumericDisplay = true;
     PlayerFrameHealthBar:SetStatusBarTexture("UI-HUD-UnitFrame-Player-PortraitOff-Bar-Health-Status", TextureKitConstants.UseAtlasSize);
@@ -61,17 +54,23 @@ function UnitFramesImproved_Style_PlayerFrame()
 end
 
 function UnitFramesImproved_Style_TargetFrame(self)
-	self.healthbar.lockColor = true;
+  if not InCombatLockdown() then
+	  self.healthbar.lockColor = true;
+  end
 end
 
 function UnitFramesImproved_TargetFrame_CheckClassification(self)
-  local healthBar = self.TargetFrameContent.TargetFrameContentMain.HealthBar;
-  healthBar.HealthBarTexture:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize);
+  if not InCombatLockdown() then
+    local healthBar = self.TargetFrameContent.TargetFrameContentMain.HealthBar;
+    healthBar.HealthBarTexture:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize);
+  end
 end
 
 function UnitFramesImproved_Style_ToT(self)
-  local healthBar = self.HealthBar;
-  healthBar:SetStatusBarTexture("UI-HUD-UnitFrame-TargetofTarget-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize);
+  if not InCombatLockdown() then
+    local healthBar = self.HealthBar;
+    healthBar:SetStatusBarTexture("UI-HUD-UnitFrame-TargetofTarget-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize);
+  end
 end
 
 -- Slashcommand stuff
@@ -132,24 +131,26 @@ function UnitFramesImproved_TextStatusBar_UpdateTextStringWithValues(statusFrame
 end
 
 function UnitFramesImproved_TargetFrame_Update(self)
-	-- Set back color of health bar
-	if ( not UnitPlayerControlled(self.unit) and UnitIsTapDenied(self.unit) ) then
-		-- Gray if npc is tapped by other player
-		self.healthbar:SetStatusBarColor(0.5, 0.5, 0.5);
-	else
-		-- Standard by class etc if not
-	  local r, g, b = UnitColor(self.healthbar.unit)
-		self.healthbar:SetStatusBarColor(r, g, b);
-	end
-	
-	if ((UnitHealth(self.unit) <= 0) and UnitIsConnected(self.unit)) then
-		if (not UnitIsUnconscious(self.unit)) then
-			if (self.healthbar.TextString) then
-				self.healthbar.TextString:Hide()
-				self.healthbar.forceHideText = true
-			end
-		end
-	end
+  if not InCombatLockdown() then
+    -- Set back color of health bar
+    if ( not UnitPlayerControlled(self.unit) and UnitIsTapDenied(self.unit) ) then
+      -- Gray if npc is tapped by other player
+      self.healthbar:SetStatusBarColor(0.5, 0.5, 0.5);
+    else
+      -- Standard by class etc if not
+      local r, g, b = UnitColor(self.healthbar.unit)
+      self.healthbar:SetStatusBarColor(r, g, b);
+    end
+    
+    if ((UnitHealth(self.unit) <= 0) and UnitIsConnected(self.unit)) then
+      if (not UnitIsUnconscious(self.unit)) then
+        if (self.healthbar.TextString) then
+          self.healthbar.TextString:Hide()
+          self.healthbar.forceHideText = true
+        end
+      end
+    end
+  end
 end
 
 -- Utility functions
