@@ -83,11 +83,15 @@ end
 
 function UnitFramesImproved_TextStatusBar_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
   if( statusFrame.LeftText and statusFrame.RightText ) then
-		statusFrame.LeftText:SetText("");
-		statusFrame.RightText:SetText("");
-		statusFrame.LeftText:Hide();
-		statusFrame.RightText:Hide();
-		textString:Show();
+    if not InCombatLockdown() then
+      statusFrame.LeftText:SetText("");
+      statusFrame.RightText:SetText("");
+      statusFrame.LeftText:Hide();
+      statusFrame.RightText:Hide();
+      if (textString) then
+        textString:Show();
+      end
+    end
 	end
 	
 	if ( ( tonumber(valueMax) ~= valueMax or valueMax > 0 ) and not ( statusFrame.pauseUpdates ) ) then
