@@ -1,13 +1,21 @@
-## Interface: 100000
+## Interface: 100002
 
 ## Title: UnitFramesImproved
 ## Notes: Extends the Blizzard unitframes for better visuals, with a minimal footprint.
-## Version: 2.0.1
+## Version: 2.1.0
 ## Author: Althalla (Kim Forsberg)
-## SavedVariables: globalSettings
-## SavedVariablesPerCharacter: characterSettings
+## OptionalDeps: LibStub, Ace3
 
 ## X-License: Public Domain
 ## X-Category: Unit Frames
+## X-Curse-Project-ID: 27038
 
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceEcent-3.0\AceEcent-3.0.xml
+#@end-no-lib-strip@
+
+HelperFunctions.lua
 UnitFramesImproved.lua
