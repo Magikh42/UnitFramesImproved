@@ -7,9 +7,6 @@ UnitFramesImproved:SetDefaultModuleState(false)
 function UnitFramesImproved:OnInitialize()
   DebugPrint("OK", "INFO", 2, "Initializing...")
 
-  -- Generic status text hook
-	hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", UnitFramesImproved_TextStatusBar_UpdateTextStringWithValues);
-
   -- Register event handlers
   self:RegisterEvent('PLAYER_TARGET_CHANGED', 'PLAYER_TARGET_CHANGED')
   self:RegisterEvent('PLAYER_FOCUS_CHANGED', 'PLAYER_FOCUS_CHANGED')
@@ -44,20 +41,39 @@ end
 -- Stylers
 function UnitFramesImproved:Style_PlayerFrame()
   if not InCombatLockdown() then
-    local healthBar = PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar
+    local healthBar = PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarsContainer.HealthBar
+    local manaBar = PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.ManaBarArea.ManaBar
+
+    -- Fix statusbar fill coloring
     healthBar:SetStatusBarTexture("UI-HUD-UnitFrame-Player-PortraitOff-Bar-Health-Status", TextureKitConstants.UseAtlasSize)
     healthBar:SetStatusBarDesaturated(true)
 
+    -- Status text hook
+    hooksecurefunc(healthBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
+    hooksecurefunc(manaBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
+
+    -- Force an update as at least on my install, it isn't updating on load
+    healthBar:UpdateTextString();
+
+    -- Force update of the status bar coloring
     UnitFramesImproved:UpdateStatusBarColor(PlayerFrame)
   end
 end
 
 function UnitFramesImproved:Style_TargetFrame(frame)
   if not InCombatLockdown() then
-    local healthBar = frame.TargetFrameContent.TargetFrameContentMain.HealthBar
+    local healthBar = frame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar
+    local manaBar = frame.TargetFrameContent.TargetFrameContentMain.ManaBar
+
+    -- Fix statusbar fill coloring
     healthBar.HealthBarTexture:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize)
     healthBar:SetStatusBarDesaturated(true)
 
+    -- Status text hook
+    hooksecurefunc(healthBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
+    hooksecurefunc(manaBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
+
+    -- Force update of the status bar coloring
     UnitFramesImproved:UpdateStatusBarColor(frame)
   end
 end
@@ -65,9 +81,12 @@ end
 function UnitFramesImproved:Style_ToTFrame(frame)
   if not InCombatLockdown() then
     local healthBar = frame.HealthBar
+
+    -- Fix statusbar fill coloring
     healthBar:SetStatusBarTexture("UI-HUD-UnitFrame-TargetofTarget-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize)
     healthBar:SetStatusBarDesaturated(true)
 
+    -- Force update of the status bar coloring
     UnitFramesImproved:UpdateStatusBarColor(frame)
   end
 end
@@ -84,30 +103,30 @@ end
 function UnitFramesImproved:UNIT_TARGET(self, unitTarget)
   if unitTarget == "target" then
     UnitFramesImproved:UpdateStatusBarColor(TargetFrameToT)
- end
+  end
   if unitTarget == "focus" then
     UnitFramesImproved:UpdateStatusBarColor(FocusFrameToT)
   end
 end
 
 -- Common Functions
-function UnitFramesImproved_TextStatusBar_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
-  if (statusFrame.LeftText and statusFrame.RightText) then
+function UnitFramesImproved_UpdateTextStringWithValues(self, textString, value, valueMin, valueMax)
+  if (self.LeftText and self.RightText) then
     --if not InCombatLockdown() then
-      statusFrame.LeftText:SetText("")
-      statusFrame.RightText:SetText("")
-      statusFrame.LeftText:Hide()
-      statusFrame.RightText:Hide()
+      self.LeftText:SetText("")
+      self.RightText:SetText("")
+      self.LeftText:Hide()
+      self.RightText:Hide()
       if (textString) then
         textString:Show()
       end
     --end
   end
 
-  if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (statusFrame.pauseUpdates)) then
+  if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (self.pauseUpdates)) then
     local valueDisplay = value;
     local valueMaxDisplay = valueMax;
-    if (statusFrame.capNumericDisplay) then
+    if (self.capNumericDisplay) then
       valueDisplay = UnitFramesImproved:AbbreviateLargeNumbers(value);
       valueMaxDisplay = UnitFramesImproved:AbbreviateLargeNumbers(valueMax);
     else
@@ -118,25 +137,25 @@ function UnitFramesImproved_TextStatusBar_UpdateTextStringWithValues(statusFrame
     local textDisplay = GetCVar("statusTextDisplay")
     if (textDisplay == "NONE") then return end
 
-    if (value and valueMax > 0 and (textDisplay ~= "NUMERIC" or statusFrame.showPercentage) and not statusFrame.showNumeric) then
+    if (value and valueMax > 0 and (textDisplay ~= "NUMERIC" or self.showPercentage) and not self.showNumeric) then
       local percent = math.ceil((value / valueMax) * 100) .. "%";
-      if (textDisplay == "BOTH" and not statusFrame.showPercentage) then
+      if (textDisplay == "BOTH" and not self.showPercentage) then
         valueDisplay = valueDisplay .. " (" .. percent .. ")";
         textString:SetText(valueDisplay);
       else
         valueDisplay = percent;
-        if (statusFrame.prefix and (statusFrame.alwaysPrefix or not (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable))) then
-          textString:SetText(statusFrame.prefix .. " " .. valueDisplay);
+        if (self.prefix and (self.alwaysPrefix or not (self.cvar and GetCVar(self.cvar) == "1" and self.textLockable))) then
+          textString:SetText(self.prefix .. " " .. valueDisplay);
         else
           textString:SetText(valueDisplay);
         end
       end
-    elseif (value == 0 and statusFrame.zeroText) then
+    elseif (value == 0 and self.zeroText) then
       return;
     else
-      statusFrame.isZero = nil;
-      if (statusFrame.prefix and (statusFrame.alwaysPrefix or not (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable))) then
-        textString:SetText(statusFrame.prefix .. " " .. valueDisplay .. "/" .. valueMaxDisplay);
+      self.isZero = nil;
+      if (self.prefix and (self.alwaysPrefix or not (self.cvar and GetCVar(self.cvar) == "1" and self.textLockable))) then
+        textString:SetText(self.prefix .. " " .. valueDisplay .. "/" .. valueMaxDisplay);
       else
         textString:SetText(valueDisplay .. "/" .. valueMaxDisplay);
       end

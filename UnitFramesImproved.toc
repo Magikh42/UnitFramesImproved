@@ -1,4 +1,4 @@
-## Interface: 100002
+## Interface: 110002
 
 ## Title: UnitFramesImproved
 ## Notes: Extends the Blizzard unitframes for better visuals, with a minimal-ish footprint.
