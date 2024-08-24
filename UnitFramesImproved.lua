@@ -38,129 +38,119 @@ function UnitFramesImproved:SlashCommand_Main()
   dout("Welcome to UnitFramesImproved. Settings have been removed as this is part of standard UI.")
 end
 
--- Stylers
-function UnitFramesImproved:Style_PlayerFrame()
-  if not InCombatLockdown() then
-    local healthBar = PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarsContainer.HealthBar
-    local manaBar = PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.ManaBarArea.ManaBar
-
-    -- Fix statusbar fill coloring
-    healthBar:SetStatusBarTexture("UI-HUD-UnitFrame-Player-PortraitOff-Bar-Health-Status", TextureKitConstants.UseAtlasSize)
-    healthBar:SetStatusBarDesaturated(true)
-
-    -- Status text hook
-    hooksecurefunc(healthBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
-    hooksecurefunc(manaBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
-
-    -- Force an update as at least on my install, it isn't updating on load
-    healthBar:UpdateTextString();
-
-    -- Force update of the status bar coloring
-    UnitFramesImproved:UpdateStatusBarColor(PlayerFrame)
-  end
-end
-
-function UnitFramesImproved:Style_TargetFrame(frame)
-  if not InCombatLockdown() then
-    local healthBar = frame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar
-    local manaBar = frame.TargetFrameContent.TargetFrameContentMain.ManaBar
-
-    -- Fix statusbar fill coloring
-    healthBar.HealthBarTexture:SetAtlas("UI-HUD-UnitFrame-Target-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize)
-    healthBar:SetStatusBarDesaturated(true)
-
-    -- Status text hook
-    hooksecurefunc(healthBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
-    hooksecurefunc(manaBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
-
-    -- Force update of the status bar coloring
-    UnitFramesImproved:UpdateStatusBarColor(frame)
-  end
-end
-
-function UnitFramesImproved:Style_ToTFrame(frame)
-  if not InCombatLockdown() then
-    local healthBar = frame.HealthBar
-
-    -- Fix statusbar fill coloring
-    healthBar:SetStatusBarTexture("UI-HUD-UnitFrame-TargetofTarget-PortraitOn-Bar-Health-Status", TextureKitConstants.UseAtlasSize)
-    healthBar:SetStatusBarDesaturated(true)
-
-    -- Force update of the status bar coloring
-    UnitFramesImproved:UpdateStatusBarColor(frame)
-  end
-end
-
 -- Event Handlers
 function UnitFramesImproved:PLAYER_TARGET_CHANGED()
+  UnitFramesImproved:Style_TargetFrame(TargetFrame)
   UnitFramesImproved:UpdateStatusBarColor(TargetFrame)
 end
 
 function UnitFramesImproved:PLAYER_FOCUS_CHANGED()
+  UnitFramesImproved:Style_TargetFrame(FocusFrame)
   UnitFramesImproved:UpdateStatusBarColor(FocusFrame)
 end
 
 function UnitFramesImproved:UNIT_TARGET(self, unitTarget)
   if unitTarget == "target" then
+    UnitFramesImproved:Style_ToTFrame(TargetFrameToT)
     UnitFramesImproved:UpdateStatusBarColor(TargetFrameToT)
   end
   if unitTarget == "focus" then
+    UnitFramesImproved:Style_ToTFrame(FocusFrameToT)
     UnitFramesImproved:UpdateStatusBarColor(FocusFrameToT)
   end
 end
 
 -- Common Functions
-function UnitFramesImproved_UpdateTextStringWithValues(self, textString, value, valueMin, valueMax)
-  if (self.LeftText and self.RightText) then
+function UnitFramesImproved_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
+  if (statusFrame.LeftText and statusFrame.RightText) then
     --if not InCombatLockdown() then
-      self.LeftText:SetText("")
-      self.RightText:SetText("")
-      self.LeftText:Hide()
-      self.RightText:Hide()
       if (textString) then
+        statusFrame.LeftText:SetText("")
+        statusFrame.RightText:SetText("")
+        statusFrame.LeftText:Hide()
+        statusFrame.RightText:Hide()
+
         textString:Show()
       end
     --end
   end
 
-  if ((tonumber(valueMax) ~= valueMax or valueMax > 0) and not (self.pauseUpdates)) then
-    local valueDisplay = value;
-    local valueMaxDisplay = valueMax;
-    if (self.capNumericDisplay) then
-      valueDisplay = UnitFramesImproved:AbbreviateLargeNumbers(value);
-      valueMaxDisplay = UnitFramesImproved:AbbreviateLargeNumbers(valueMax);
-    else
-      valueDisplay = BreakUpLargeNumbers(value);
-      valueMaxDisplay = BreakUpLargeNumbers(valueMax);
-    end
+	if ( ( tonumber(valueMax) ~= valueMax or valueMax > 0 ) and not ( statusFrame.pauseUpdates ) ) then
+		statusFrame:Show();
+		
+		if ( (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable) or statusFrame.forceShow ) then
+			textString:Show();
+		elseif ( statusFrame.lockShow > 0 and (not statusFrame.forceHideText) ) then
+			textString:Show();
+		else
+			textString:SetText("");
+			textString:Hide();
+			return;
+		end
 
-    local textDisplay = GetCVar("statusTextDisplay")
-    if (textDisplay == "NONE") then return end
+		local valueDisplay = value;
+		local valueMaxDisplay = valueMax;
+		-- Modern WoW always breaks up large numbers, whereas Classic never did.
+		-- We'll remove breaking-up by default for Classic, but add a flag to reenable it.
+		if ( statusFrame.breakUpLargeNumbers ) then
+			if ( statusFrame.capNumericDisplay ) then
+				valueDisplay = UnitFramesImproved:AbbreviateLargeNumbers(value);
+				valueMaxDisplay = UnitFramesImproved:AbbreviateLargeNumbers(valueMax);
+			else
+				valueDisplay = BreakUpLargeNumbers(value);
+				valueMaxDisplay = BreakUpLargeNumbers(valueMax);
+			end
+		end
 
-    if (value and valueMax > 0 and (textDisplay ~= "NUMERIC" or self.showPercentage) and not self.showNumeric) then
-      local percent = math.ceil((value / valueMax) * 100) .. "%";
-      if (textDisplay == "BOTH" and not self.showPercentage) then
-        valueDisplay = valueDisplay .. " (" .. percent .. ")";
-        textString:SetText(valueDisplay);
-      else
-        valueDisplay = percent;
-        if (self.prefix and (self.alwaysPrefix or not (self.cvar and GetCVar(self.cvar) == "1" and self.textLockable))) then
-          textString:SetText(self.prefix .. " " .. valueDisplay);
-        else
-          textString:SetText(valueDisplay);
-        end
-      end
-    elseif (value == 0 and self.zeroText) then
-      return;
-    else
-      self.isZero = nil;
-      if (self.prefix and (self.alwaysPrefix or not (self.cvar and GetCVar(self.cvar) == "1" and self.textLockable))) then
-        textString:SetText(self.prefix .. " " .. valueDisplay .. "/" .. valueMaxDisplay);
-      else
-        textString:SetText(valueDisplay .. "/" .. valueMaxDisplay);
-      end
-    end
-  end
+		local textDisplay = GetCVar("statusTextDisplay");
+		if ( value and valueMax > 0 and ( (textDisplay ~= "NUMERIC" and textDisplay ~= "NONE") or statusFrame.showPercentage ) and not statusFrame.showNumeric) then
+			if ( value == 0 and statusFrame.zeroText ) then
+				textString:SetText(statusFrame.zeroText);
+				statusFrame.isZero = 1;
+				textString:Show();
+			elseif ( textDisplay == "BOTH" and not statusFrame.showPercentage) then
+				if( statusFrame.LeftText and statusFrame.RightText ) then
+					if(not statusFrame.powerToken or statusFrame.powerToken == "MANA") then
+						statusFrame.LeftText:SetText(math.ceil((value / valueMax) * 100) .. "%");
+						statusFrame.LeftText:Show();
+					end
+					statusFrame.RightText:SetText(valueDisplay);
+					statusFrame.RightText:Show();
+					textString:Hide();
+				else
+					valueDisplay = "(" .. math.ceil((value / valueMax) * 100) .. "%) " .. valueDisplay .. " / " .. valueMaxDisplay;
+				end
+				textString:SetText(valueDisplay);
+			else
+				valueDisplay = math.ceil((value / valueMax) * 100) .. "%";
+				if ( statusFrame.prefix and (statusFrame.alwaysPrefix or not (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable) ) ) then
+					textString:SetText(statusFrame.prefix .. " " .. valueDisplay);
+				else
+					textString:SetText(valueDisplay);
+				end
+			end
+		elseif ( value == 0 and statusFrame.zeroText ) then
+			textString:SetText(statusFrame.zeroText);
+			statusFrame.isZero = 1;
+			textString:Show();
+			return;
+		else
+			statusFrame.isZero = nil;
+			if ( statusFrame.prefix and (statusFrame.alwaysPrefix or not (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable) ) ) then
+				textString:SetText(statusFrame.prefix.." "..valueDisplay.." / "..valueMaxDisplay);
+			else
+				textString:SetText(valueDisplay.." / "..valueMaxDisplay);
+			end
+		end
+	else
+		textString:Hide();
+		textString:SetText("");
+		if ( not statusFrame.alwaysShow ) then
+			statusFrame:Hide();
+		else
+			statusFrame:SetValue(0);
+		end
+	end
 end
 
 function UnitFramesImproved:UpdateStatusBarColor(frame)

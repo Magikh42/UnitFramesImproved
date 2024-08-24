@@ -1,3 +1,9 @@
+-- Set up the chunk arguments to use between each chunk of the addon
+local chunkArgs = ...
+
+-- Assign a local reference to the addon
+local UnitFramesImproved = chunkArgs.addon
+
 -- Stylers
 function UnitFramesImproved:Style_PlayerFrame()
   if not InCombatLockdown() then
@@ -16,7 +22,7 @@ function UnitFramesImproved:Style_PlayerFrame()
     healthBar:UpdateTextString();
 
     -- Force update of the status bar coloring
-    UnitFramesImproved:UpdateStatusBarColor(PlayerFrame)
+    UnitFramesImproved:UpdateStatusBarColor(healthBar)
   end
 end
 
@@ -34,7 +40,7 @@ function UnitFramesImproved:Style_TargetFrame(frame)
     hooksecurefunc(manaBar, "UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues);
 
     -- Force update of the status bar coloring
-    UnitFramesImproved:UpdateStatusBarColor(frame)
+    UnitFramesImproved:UpdateStatusBarColor(healthBar)
   end
 end
 

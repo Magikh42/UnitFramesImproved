@@ -1,4 +1,4 @@
-## Interface: 110002
+## Interface: 40400
 
 ## Title: UnitFramesImproved
 ## Notes: Extends the Blizzard unitframes for better visuals, with a minimal-ish footprint.
@@ -19,4 +19,5 @@ Libs\AceEvent-3.0\AceEvent-3.0.xml
 #@end-no-lib-strip@
 
 HelperFunctions.lua
+UnitFramesImproved_Cata.lua
 UnitFramesImproved.lua

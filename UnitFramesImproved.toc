@@ -19,4 +19,5 @@ Libs\AceEvent-3.0\AceEvent-3.0.xml
 #@end-no-lib-strip@
 
 HelperFunctions.lua
+UnitFramesImproved_Retail.lua
 UnitFramesImproved.lua
