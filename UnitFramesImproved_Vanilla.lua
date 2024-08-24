@@ -1,4 +1,4 @@
--- Stylers
+-- Stylers for Vanilla
 function UnitFramesImproved:Style_PlayerFrame()
 	PlayerFrameHealthBar.healthbar = PlayerFrameHealthBar
 
@@ -25,12 +25,6 @@ function UnitFramesImproved:Style_PlayerFrame()
   -- Set the player frame textures
 	PlayerFrameTexture:SetTexture("Interface\\Addons\\UnitFramesImproved\\Textures\\UI-TargetingFrame")
 	PlayerStatusTexture:SetTexture("Interface\\Addons\\UnitFramesImproved\\Textures\\UI-Player-Status")
-
-  -- Ensure that numeric display is capped
-  healthBar.breakUpLargeNumbers = true
-  healthBar.capNumericDisplay = true
-  manaBar.breakUpLargeNumbers = true
-  manaBar.capNumericDisplay = true
 
   -- Status text hook (used by all the statusbars!)
   hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", UnitFramesImproved_UpdateTextStringWithValues)
@@ -122,12 +116,6 @@ function UnitFramesImproved:Style_TargetFrame(frame)
     else
       frame.pvpIcon:Hide();
     end
-
-    -- Ensure that numeric display is capped
-    healthBar.breakUpLargeNumbers = true
-    healthBar.capNumericDisplay = true
-    manaBar.breakUpLargeNumbers = true
-    manaBar.capNumericDisplay = true
   end
 end
 

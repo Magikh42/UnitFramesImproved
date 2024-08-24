@@ -62,7 +62,7 @@ end
 
 -- Common Functions
 function UnitFramesImproved_UpdateTextStringWithValues(statusFrame, textString, value, valueMin, valueMax)
-  if (statusFrame.LeftText and statusFrame.RightText) then
+  if (false and statusFrame.LeftText and statusFrame.RightText) then
     --if not InCombatLockdown() then
       if (textString) then
         statusFrame.LeftText:SetText("")
@@ -76,31 +76,8 @@ function UnitFramesImproved_UpdateTextStringWithValues(statusFrame, textString, 
   end
 
 	if ( ( tonumber(valueMax) ~= valueMax or valueMax > 0 ) and not ( statusFrame.pauseUpdates ) ) then
-		statusFrame:Show();
-		
-		if ( (statusFrame.cvar and GetCVar(statusFrame.cvar) == "1" and statusFrame.textLockable) or statusFrame.forceShow ) then
-			textString:Show();
-		elseif ( statusFrame.lockShow > 0 and (not statusFrame.forceHideText) ) then
-			textString:Show();
-		else
-			textString:SetText("");
-			textString:Hide();
-			return;
-		end
-
-		local valueDisplay = value;
-		local valueMaxDisplay = valueMax;
-		-- Modern WoW always breaks up large numbers, whereas Classic never did.
-		-- We'll remove breaking-up by default for Classic, but add a flag to reenable it.
-		if ( statusFrame.breakUpLargeNumbers ) then
-			if ( statusFrame.capNumericDisplay ) then
-				valueDisplay = UnitFramesImproved:AbbreviateLargeNumbers(value);
-				valueMaxDisplay = UnitFramesImproved:AbbreviateLargeNumbers(valueMax);
-			else
-				valueDisplay = BreakUpLargeNumbers(value);
-				valueMaxDisplay = BreakUpLargeNumbers(valueMax);
-			end
-		end
+		local valueDisplay = UnitFramesImproved:AbbreviateLargeNumbers(value);
+		local valueMaxDisplay = UnitFramesImproved:AbbreviateLargeNumbers(valueMax);
 
 		local textDisplay = GetCVar("statusTextDisplay");
 		if ( value and valueMax > 0 and ( (textDisplay ~= "NUMERIC" and textDisplay ~= "NONE") or statusFrame.showPercentage ) and not statusFrame.showNumeric) then
