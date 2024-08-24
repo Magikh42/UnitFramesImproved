@@ -133,20 +133,3 @@ end
 
 function UnitFramesImproved:Style_ToTFrame(frame)
 end
-
-function UnitFramesImproved:CreateStatusBarText(name, parentName, parent, point, x, y)
-	local fontString = parent:CreateFontString(parentName..name, nil, "TextStatusBarText")
-	fontString:SetPoint(point, parent, point, x, y)
-	
-	return fontString
-end
-
-function UnitFramesImproved:SetFontSize(fontString, size)
-  if(fontString ~= nil and size > 0) then
-    -- Retrieve the current font settings
-    local font, _, flags = fontString:GetFont()
-
-    -- Set the font again with the new size
-    fontString:SetFont(font, size, flags)
-  end
-end
