@@ -2,9 +2,11 @@
 function UnitFramesImproved:Style_PlayerFrame()
 	PlayerFrameHealthBar.healthbar = PlayerFrameHealthBar
 
+  -- Set up some local variables
   local healthBar = PlayerFrameHealthBar
   local manaBar = PlayerFrameManaBar
-  if not InCombatLockdown() then 
+
+  if (not InCombatLockdown()) then 
 		healthBar.lockColor = true
 		healthBar.capNumericDisplay = true
 		healthBar:SetWidth(119)
@@ -15,6 +17,11 @@ function UnitFramesImproved:Style_PlayerFrame()
 		healthBar.TextString:SetPoint("CENTER",50,6)
 		healthBar.LeftText:SetPoint("LEFT",110,6)
 		healthBar.RightText:SetPoint("RIGHT",-8,6)
+
+    -- Style the manabar fontstrings
+    UnitFramesImproved:SetFontSize(healthBar.TextString, 14)
+    UnitFramesImproved:SetFontSize(healthBar.LeftText, 14)
+    UnitFramesImproved:SetFontSize(healthBar.RightText, 14)
 
     -- Set fonts sizes for PlayerFrameManabar
     UnitFramesImproved:SetFontSize(manaBar.TextString, 12)
@@ -34,24 +41,47 @@ function UnitFramesImproved:Style_PlayerFrame()
 end
 
 function UnitFramesImproved:Style_TargetFrame(frame)
+  -- Exit early if the frame is nil, such as in Vanilla, where the FocusFrame doesn't exist. But the addon will anyway try to style it to keep the code common.
   if (not frame) then
     return
   end
 
+  -- Set up some local variables
   local healthBar = frame.healthbar
   local manaBar = frame.manabar
-	if not InCombatLockdown() then
-    -- Create healthbar and manabar status texts
-    if (healthBar and not healthBar.LeftText and not healthBar.TextString and not healthBar.RightText) then
-      healthBar.TextString = UnitFramesImproved:CreateStatusBarText("Text", frame:GetName().."HealthBar", frame.textureFrame, "CENTER", -50, 6)
-      healthBar.LeftText = UnitFramesImproved:CreateStatusBarText("TextLeft", frame:GetName().."HealthBar", frame.textureFrame, "LEFT", 8, 6)
-      healthBar.RightText = UnitFramesImproved:CreateStatusBarText("TextRight", frame:GetName().."HealthBar", frame.textureFrame, "RIGHT", -110, 6)
+
+  if (not InCombatLockdown()) then 
+    -- Create and/or style the healthBar texts
+    if (healthBar) then
+      if (not healthBar.LeftText and not healthBar.TextString and not healthBar.RightText) then
+        healthBar.TextString = UnitFramesImproved:CreateStatusBarText("Text", frame:GetName().."HealthBar", frame.textureFrame, "CENTER", -50, 6)
+        healthBar.LeftText = UnitFramesImproved:CreateStatusBarText("TextLeft", frame:GetName().."HealthBar", frame.textureFrame, "LEFT", 8, 6)
+        healthBar.RightText = UnitFramesImproved:CreateStatusBarText("TextRight", frame:GetName().."HealthBar", frame.textureFrame, "RIGHT", -110, 6)
+      else
+        -- Adjust fontstring anchors
+        healthBar.TextString:SetPoint("CENTER",50,6)
+        healthBar.LeftText:SetPoint("LEFT",8,6)
+        healthBar.RightText:SetPoint("RIGHT",-110,6)
+      end
+
+      -- Style the manabar fontstrings
+      UnitFramesImproved:SetFontSize(healthBar.TextString, 14)
+      UnitFramesImproved:SetFontSize(healthBar.LeftText, 14)
+      UnitFramesImproved:SetFontSize(healthBar.RightText, 14)
 		end
 
-    if (manaBar and not manaBar.LeftText and not manaBar.TextString and not manaBar.RightText) then
-      manaBar.TextString = UnitFramesImproved:CreateStatusBarText("Text", frame:GetName().."ManaBar", frame.textureFrame, "CENTER", -50, -8)
-      manaBar.LeftText = UnitFramesImproved:CreateStatusBarText("TextLeft", frame:GetName().."ManaBar", frame.textureFrame, "LEFT", 8, -8)
-      manaBar.RightText = UnitFramesImproved:CreateStatusBarText("TextRight", frame:GetName().."ManaBar", frame.textureFrame, "RIGHT", -110, -8)
+    -- Create and/or style the manaBar texts
+    if (manaBar) then
+      if (not manaBar.LeftText and not manaBar.TextString and not manaBar.RightText) then
+        manaBar.TextString = UnitFramesImproved:CreateStatusBarText("Text", frame:GetName().."ManaBar", frame.textureFrame, "CENTER", -50, -8)
+        manaBar.LeftText = UnitFramesImproved:CreateStatusBarText("TextLeft", frame:GetName().."ManaBar", frame.textureFrame, "LEFT", 8, -8)
+        manaBar.RightText = UnitFramesImproved:CreateStatusBarText("TextRight", frame:GetName().."ManaBar", frame.textureFrame, "RIGHT", -110, -8)
+      else
+        -- Adjust fontstring anchors
+        manaBar.TextString:SetPoint("CENTER",-50,-8)
+        manaBar.LeftText:SetPoint("LEFT",8,-8)
+        manaBar.RightText:SetPoint("RIGHT",-110,-8)
+      end
 
       -- Style the manabar fontstrings
       UnitFramesImproved:SetFontSize(manaBar.TextString, 12)
